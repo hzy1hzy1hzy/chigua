@@ -3,9 +3,10 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/',
+  // 使用相对路径基础，防止部署在非根目录下时的资源丢失
+  base: './',
   define: {
-    // 处理生产环境下环境变量的注入
+    // 确保 API_KEY 能正确注入到客户端代码
     'process.env.API_KEY': JSON.stringify(process.env.API_KEY)
   },
   server: {
@@ -19,6 +20,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    target: 'esnext'
+    target: 'esnext',
+    sourcemap: false
   }
 });
