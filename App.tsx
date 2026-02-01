@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { generateGossipReport, parseHotSearchFromImage } from './services/geminiService';
 import { AppStatus, RawResults, NewsSource, HotItem, AppMode } from './types';
@@ -27,24 +26,24 @@ const App: React.FC = () => {
   }, []);
 
   const fetchMockHotData = async (source: NewsSource): Promise<HotItem[]> => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 800));
     const encodeSearch = (q: string) => encodeURIComponent(q);
     
-    // 模拟数据变动：随机选择一部分数据并微调热度
-    const randomShift = () => Math.floor(Math.random() * 50000);
+    // 增加随机偏移量，模拟榜单的热度跳动
+    const drift = () => Math.floor(Math.random() * 20000) - 10000;
 
     if (source === '微博热搜') {
       const baseData = [
-        { title: "名侦探柯南声明", hotness: (2071926 + randomShift()).toString(), tag: "爆" },
-        { title: "微博之夜 官宣阵容", hotness: (1597149 + randomShift()).toString(), tag: "热" },
-        { title: "国产电力心脏全球爆单", hotness: (904994 + randomShift()).toString(), tag: "新" },
-        { title: "周杰伦演唱会 抢票", hotness: (852331 + randomShift()).toString(), tag: "热" },
+        { title: "名侦探柯南声明", hotness: (2071926 + drift()).toString(), tag: "爆" },
+        { title: "微博之夜 官宣阵容", hotness: (1597149 + drift()).toString(), tag: "热" },
+        { title: "国产电力心脏全球爆单", hotness: (904994 + drift()).toString(), tag: "新" },
+        { title: "周杰伦演唱会 抢票", hotness: (852331 + drift()).toString(), tag: "热" },
         { title: "美团外卖周末半价吃大餐", hotness: "推荐", tag: "商" },
-        { title: "中国最新富豪榜出炉", hotness: (694746 + randomShift()).toString(), tag: "新" },
-        { title: "原来这就是极简主义生活", hotness: (542110 + randomShift()).toString(), tag: "暖" },
-        { title: "冬天的第一根冰糖葫芦", hotness: (410229 + randomShift()).toString(), tag: "新" },
-        { title: "猫咪也会因为害羞躲起来吗", hotness: (320118 + randomShift()).toString(), tag: "荐" },
-        { title: "打工人周五的心情", hotness: (298774 + randomShift()).toString(), tag: "新" }
+        { title: "中国最新富豪榜出炉", hotness: (694746 + drift()).toString(), tag: "新" },
+        { title: "原来这就是极简主义生活", hotness: (542110 + drift()).toString(), tag: "暖" },
+        { title: "冬天的第一根冰糖葫芦", hotness: (410229 + drift()).toString(), tag: "新" },
+        { title: "猫咪也会因为害羞躲起来吗", hotness: (320118 + drift()).toString(), tag: "荐" },
+        { title: "打工人周五的心情", hotness: (298774 + drift()).toString(), tag: "新" }
       ];
       return baseData.map(d => ({
         ...d,
@@ -52,16 +51,16 @@ const App: React.FC = () => {
       }));
     } else {
       const baseData = [
-        { title: "全网挑战这个丝滑小连招", hotness: `🔥 ${1200 + Math.floor(Math.random() * 100)}w`, tag: "热" },
-        { title: "这就是生活中的小确幸吧", hotness: `💖 ${800 + Math.floor(Math.random() * 100)}w`, tag: "荐" },
-        { title: "假如动物会说话", hotness: `🎭 ${700 + Math.floor(Math.random() * 100)}w`, tag: "新" },
-        { title: "我的家乡在冬季美如画", hotness: `❄️ ${600 + Math.floor(Math.random() * 100)}w`, tag: "热" },
-        { title: "这个冬天一定要去一次哈尔滨", hotness: `🚄 ${500 + Math.floor(Math.random() * 100)}w`, tag: "爆" },
-        { title: "打工人的午餐开箱", hotness: `🍱 ${400 + Math.floor(Math.random() * 100)}w`, tag: "新" },
-        { title: "00后整顿职场名场面", hotness: `💼 ${300 + Math.floor(Math.random() * 100)}w`, tag: "热" },
-        { title: "被这首BGM洗脑了", hotness: `🎵 ${200 + Math.floor(Math.random() * 100)}w`, tag: "新" },
-        { title: "那些年我们追过的偶像剧", hotness: `📺 ${100 + Math.floor(Math.random() * 100)}w`, tag: "荐" },
-        { title: "大学生组团去泰山看日出", hotness: `🌅 ${50 + Math.floor(Math.random() * 100)}w`, tag: "新" }
+        { title: "全网挑战这个丝滑小连招", hotness: `🔥 ${1200 + Math.floor(Math.random() * 50)}w`, tag: "热" },
+        { title: "这就是生活中的小确幸吧", hotness: `💖 ${800 + Math.floor(Math.random() * 50)}w`, tag: "荐" },
+        { title: "假如动物会说话", hotness: `🎭 ${700 + Math.floor(Math.random() * 50)}w`, tag: "新" },
+        { title: "我的家乡在冬季美如画", hotness: `❄️ ${600 + Math.floor(Math.random() * 50)}w`, tag: "热" },
+        { title: "这个冬天一定要去一次哈尔滨", hotness: `🚄 ${500 + Math.floor(Math.random() * 50)}w`, tag: "爆" },
+        { title: "打工人的午餐开箱", hotness: `🍱 ${400 + Math.floor(Math.random() * 50)}w`, tag: "新" },
+        { title: "00后整顿职场名场面", hotness: `💼 ${300 + Math.floor(Math.random() * 50)}w`, tag: "热" },
+        { title: "被这首BGM洗脑了", hotness: `🎵 ${200 + Math.floor(Math.random() * 50)}w`, tag: "新" },
+        { title: "那些年我们追过的偶像剧", hotness: `📺 ${100 + Math.floor(Math.random() * 50)}w`, tag: "荐" },
+        { title: "大学生组团去泰山看日出", hotness: `🌅 ${50 + Math.floor(Math.random() * 50)}w`, tag: "新" }
       ];
       return baseData.map(d => ({
         ...d,
@@ -72,7 +71,6 @@ const App: React.FC = () => {
 
   const startAnalysis = async () => {
     setErrorMessage("");
-    // 保持旧数据可见直到新数据到来，提升体验
     setStatus(activeMode === 'screenshot' ? AppStatus.PROCESSING_IMAGE : AppStatus.FETCHING);
     
     try {
@@ -131,7 +129,6 @@ const App: React.FC = () => {
         <Header lastUpdated={lastUpdated} />
         
         <div className="p-4 md:p-10 max-w-6xl mx-auto w-full">
-          {/* Main Action Area */}
           <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-8">
             <div className="mb-6 flex justify-between items-start">
               <div>
@@ -148,9 +145,9 @@ const App: React.FC = () => {
               {lastUpdated && (
                 <button 
                   onClick={startAnalysis}
-                  className="text-xs font-bold text-green-600 hover:text-green-700 flex items-center gap-1 transition-colors"
+                  className="text-xs font-bold text-green-600 hover:text-green-700 flex items-center gap-1 transition-colors px-3 py-1.5 bg-green-50 rounded-lg"
                 >
-                  <span className="animate-spin">🔄</span> 立即更新榜单
+                  <span className="animate-spin-slow">🔄</span> 强制刷新瓜田
                 </button>
               )}
             </div>
@@ -174,12 +171,6 @@ const App: React.FC = () => {
                 Powered by Gemini 3 Flash
               </span>
             </button>
-            
-            {activeMode === 'screenshot' && !uploadedImage && (
-              <p className="mt-4 text-center text-xs text-orange-500 font-bold animate-pulse italic">
-                💡 别忘了！请先在侧边栏上传一张热搜榜单截图
-              </p>
-            )}
           </div>
 
           <StatusIndicator status={status} error={errorMessage} />

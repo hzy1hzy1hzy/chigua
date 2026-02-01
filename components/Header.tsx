@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface HeaderProps {
@@ -16,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({ lastUpdated }) => {
 
   const timeString = lastUpdated 
     ? lastUpdated.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-    : "尚未采摘";
+    : "准备就绪";
 
   return (
     <header className="bg-white border-b border-gray-200 px-8 py-6 sticky top-0 z-10">
@@ -31,10 +30,10 @@ const Header: React.FC<HeaderProps> = ({ lastUpdated }) => {
         </div>
         <div className="flex flex-col items-end gap-1">
           <div className="bg-green-50 px-3 py-1 rounded-full text-green-700 text-xs font-semibold border border-green-100">
-            AI 实时热榜总结
+            热搜实时同步中
           </div>
           <p className="text-[10px] text-gray-400 font-mono">
-            最后更新: {timeString}
+            {lastUpdated ? `最后更新: ${timeString}` : "等待数据采摘..."}
           </p>
         </div>
       </div>
