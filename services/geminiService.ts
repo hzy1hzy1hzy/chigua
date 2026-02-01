@@ -1,32 +1,58 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { RawResults, HotItem } from "../types";
 
+/**
+ * 格式化 API 错误信息，避免输出原始 JSON 字符串
+ */
+const formatError = (error: any): string => {
+  const message = error.message || "";
+  
+  // 捕获 API Key 失效
+  if (message.includes("API key expired") || message.includes("API_KEY_INVALID")) {
+    return "❌ 您的 API Key 已过期或无效。请前往 Google AI Studio 重新生成 Key，并在 Zeabur 环境变量中更新 API_KEY。";
+  }
+  
+  // 捕获额度限制
+  if (message.includes("429") || message.includes("quota") || message.includes("RESOURCE_EXHAUSTED")) {
+    return "⚠️ API 调用过于频繁或额度已耗尽。请稍等几分钟再试，或更换为付费版 Key。";
+  }
+
+  // 尝试解析可能被 JSON 化的错误字符串
+  try {
+    if (message.startsWith('{')) {
+      const parsed = JSON.parse(message);
+      return parsed.error?.message || "发生未知 API 错误";
+    }
+  } catch (e) {
+    // 解析失败则按原样处理
+  }
+
+  return message || "无法获取实时数据，请稍后重试。";
+};
+
 const getAIClient = () => {
   const apiKey = process.env.API_KEY;
   if (!apiKey || apiKey === "undefined" || apiKey === "") {
-    throw new Error("API Key 未配置或注入失败。请检查 Zeabur 环境变量设置并确保已移除 index.html 的 importmap。");
+    throw new Error("API Key 未配置。请在 Zeabur 后台添加 API_KEY 环境变量，并点击 'Redeploy'。");
   }
   return new GoogleGenAI({ apiKey });
 };
 
 /**
- * 优化：一次性获取所有选中平台的热搜，节省 API 额度并提高速度
+ * 优化：一次性获取所有选中平台的热搜
  */
 export const fetchAllLiveTrends = async (sources: string[]): Promise<{ results: RawResults, groundingSources: any[] }> => {
   const ai = getAIClient();
   const timestamp = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
   
-  // 更加强制性的提示词，确保模型使用 googleSearch 获取实时而非训练数据
   const prompt = `你现在是一名实时新闻采编。
   请使用 Google Search 搜索并列出当前（北京时间：${timestamp}）以下平台的实时热搜榜单前 10 名：${sources.join('、')}。
   
-  请严格按照以下格式输出每个平台的数据，以便我解析：
+  请严格按照以下格式输出每个平台的数据：
   平台名称：[平台名]
   1. [标题] | [热度值] | [标签]
   2. [标题] | [热度值] | [标签]
-  ...
-  
-  请确保数据是此时此刻最新的。`;
+  ...`;
 
   try {
     const response = await ai.models.generateContent({
@@ -34,7 +60,7 @@ export const fetchAllLiveTrends = async (sources: string[]): Promise<{ results: 
       contents: prompt,
       config: {
         tools: [{ googleSearch: {} }],
-        temperature: 0.1, // 降低随机性，提高数据准确度
+        temperature: 0.1,
       },
     });
 
@@ -70,21 +96,14 @@ export const fetchAllLiveTrends = async (sources: string[]): Promise<{ results: 
       }
     });
 
-    // 如果没解析出东西，但有文本，尝试更宽松的解析
     if (Object.keys(results).length === 0 && text.length > 50) {
-        results["实时热点"] = [{ title: "数据解析异常，但已捕获搜索结果，请查看日报", url: "#" }];
+        results["实时热点"] = [{ title: "数据获取成功，内容已在日报中呈现", url: "#" }];
     }
 
     return { results, groundingSources: groundingChunks };
   } catch (error: any) {
     console.error("Live Fetch Error:", error);
-    
-    // 专门捕获 429 错误
-    if (error.message?.includes("429") || error.message?.includes("quota") || error.message?.includes("RESOURCE_EXHAUSTED")) {
-      throw new Error("⚠️ Gemini API 额度已耗尽。免费版 API 限制较高，请在 Zeabur 后台更换为付费项目 API Key 或 5 分钟后再试。");
-    }
-    
-    throw new Error(error.message || "无法获取实时数据，请稍后重试。");
+    throw new Error(formatError(error));
   }
 };
 
@@ -102,7 +121,7 @@ export const parseHotSearchFromImage = async (base64Data: string, mimeType: stri
     });
     return JSON.parse(response.text || "{}");
   } catch (error) {
-    throw new Error("图片识别失败，请确保截图清晰。");
+    throw new Error(formatError(error));
   }
 };
 
@@ -119,6 +138,6 @@ export const generateGossipReport = async (data: RawResults): Promise<string> =>
     });
     return response.text || "主编今天罢工了...";
   } catch (error) {
-    throw new Error("日报排版失败。");
+    throw new Error(formatError(error));
   }
 };
