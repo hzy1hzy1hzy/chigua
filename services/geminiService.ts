@@ -1,10 +1,8 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { RawResults, HotItem } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 export const parseHotSearchFromImage = async (base64Data: string, mimeType: string): Promise<RawResults> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const prompt = "请分析这张热搜榜单截图。识别这是哪个平台的榜单（如微博、抖音、百度等），并提取其中的热搜标题、排名、热度数值和特殊标签（如'新'、'热'、'荐'、'爆'）。请以 JSON 格式返回，Key 为平台名称（如'微博热搜'），Value 为包含 title, hotness, tag, rank 的对象数组。";
 
   try {
@@ -76,6 +74,7 @@ export const parseHotSearchFromImage = async (base64Data: string, mimeType: stri
 };
 
 export const generateGossipReport = async (data: RawResults): Promise<string> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   let formattedData = "";
   for (const [source, items] of Object.entries(data)) {
     formattedData += `\n【${source}】\n` + items.map((item, idx) => 

@@ -14,7 +14,7 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
         #root:empty::before {
-            content: '🍉 正在初始化瓜田...';
+            content: '🍉 瓜田正在加载中，请稍候...';
             position: absolute;
             top: 50%;
             left: 50%;
@@ -28,19 +28,18 @@
 <script type="importmap">
 {
   "imports": {
+    "react/": "https://esm.sh/react@^19.2.4/",
     "react": "https://esm.sh/react@^19.2.4",
     "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "react/": "https://esm.sh/react@^19.2.4/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.39.0",
     "vite": "https://esm.sh/vite@^7.3.1",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "@google/genai": "https://esm.sh/@google/genai@^1.39.0"
   }
 }
 </script>
 </head>
 <body class="bg-gray-50 text-gray-900 min-h-screen">
     <div id="root"></div>
-    <!-- Vite 将会自动处理 index.tsx 及其所有导入 -->
     <script type="module" src="/index.tsx"></script>
 </body>
 </html>
