@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { generateGossipReport, parseHotSearchFromImage, fetchLiveTrends } from './services/geminiService';
+import { generateGossipReport, parseHotSearchFromImage, fetchAllLiveTrends } from './services/geminiService';
 import { AppStatus, RawResults, NewsSource, HotItem, AppMode } from './types';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -34,22 +34,21 @@ const App: React.FC = () => {
     
     try {
       let finalResults: RawResults = {};
-      let allSearchSources: any[] = [];
+      let allGroundingSources: any[] = [];
 
       if (activeMode === 'screenshot') {
         if (!uploadedImage) throw new Error("⚠️ 请先在左侧上传热搜榜单截图");
         finalResults = await parseHotSearchFromImage(uploadedImage.data, uploadedImage.type);
       } else {
         if (selectedSources.length === 0) throw new Error("⚠️ 请至少选择一个采摘平台");
-        for (const source of selectedSources) {
-          const { items, sources } = await fetchLiveTrends(source);
-          finalResults[source] = items;
-          allSearchSources = [...allSearchSources, ...sources];
-        }
+        // 优化：合并为一个请求
+        const { results, groundingSources } = await fetchAllLiveTrends(selectedSources);
+        finalResults = results;
+        allGroundingSources = groundingSources;
       }
 
       setRawResults(finalResults);
-      setSearchSources(allSearchSources);
+      setSearchSources(allGroundingSources);
       setLastUpdated(new Date());
       setStatus(AppStatus.ANALYZING);
       
@@ -57,6 +56,7 @@ const App: React.FC = () => {
       setReport(aiReport);
       setStatus(AppStatus.COMPLETED);
     } catch (error: any) {
+      console.error("Analysis failed:", error);
       setErrorMessage(error.message || "分析失败，请稍后重试");
       setStatus(AppStatus.ERROR);
     }
@@ -106,7 +106,7 @@ const App: React.FC = () => {
                     : '我们将通过 Google Search 实时查询全网当前最真实的热点趋势。'}
                 </p>
               </div>
-              {lastUpdated && (
+              {lastUpdated && status !== AppStatus.FETCHING && (
                 <button 
                   onClick={startAnalysis}
                   className="text-xs font-bold text-green-600 hover:text-green-700 flex items-center gap-1 transition-colors px-3 py-1.5 bg-green-50 rounded-lg"
