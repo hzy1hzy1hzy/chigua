@@ -14,13 +14,14 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
         #root:empty::before {
-            content: '正在载入瓜田...';
+            content: '🍉 正在初始化瓜田...';
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             color: #94a3b8;
             font-weight: 700;
+            font-size: 1.2rem;
         }
     </style>
 <script type="importmap">
@@ -38,7 +39,7 @@
 </head>
 <body class="bg-gray-50 text-gray-900 min-h-screen">
     <div id="root"></div>
-    <!-- 使用相对路径引用入口文件 -->
-    <script type="module" src="./index.tsx"></script>
+    <!-- Vite 入口：必须指向 index.tsx，Vite 构建时会自动处理 -->
+    <script type="module" src="/index.tsx"></script>
 </body>
 </html>
