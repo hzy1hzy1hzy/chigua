@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { RawResults } from '../types';
+import { RawResults, HotItem } from '../types';
 
 interface TabViewProps {
   report: string;
@@ -93,7 +93,8 @@ const TabView: React.FC<TabViewProps> = ({ report, rawResults, isLoading }) => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {Object.entries(rawResults).map(([source, items]) => (
+            {/* Fix: Explicitly cast Object.entries results to [string, HotItem[]][] to resolve "unknown" type error on items */}
+            {(Object.entries(rawResults) as [string, HotItem[]][]).map(([source, items]) => (
               <div key={source} className="flex flex-col border border-gray-100 rounded-2xl overflow-hidden bg-white shadow-sm">
                 <div className="px-5 py-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
                   <h3 className="font-black text-gray-800 flex items-center gap-2">

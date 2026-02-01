@@ -3,9 +3,9 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: './',
+  base: '/',
   define: {
-    // 映射环境变量供浏览器端使用
+    // 处理生产环境下环境变量的注入
     'process.env.API_KEY': JSON.stringify(process.env.API_KEY)
   },
   server: {
