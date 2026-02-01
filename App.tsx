@@ -15,6 +15,7 @@ const App: React.FC = () => {
   const [rawResults, setRawResults] = useState<RawResults>({});
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [uploadedImage, setUploadedImage] = useState<{data: string, type: string, preview: string} | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const handleReset = useCallback(() => {
     setReport("");
@@ -22,43 +23,47 @@ const App: React.FC = () => {
     setStatus(AppStatus.IDLE);
     setErrorMessage("");
     setUploadedImage(null);
+    setLastUpdated(null);
   }, []);
 
   const fetchMockHotData = async (source: NewsSource): Promise<HotItem[]> => {
-    await new Promise(resolve => setTimeout(resolve, 1200));
+    await new Promise(resolve => setTimeout(resolve, 1000));
     const encodeSearch = (q: string) => encodeURIComponent(q);
+    
+    // 模拟数据变动：随机选择一部分数据并微调热度
+    const randomShift = () => Math.floor(Math.random() * 50000);
 
     if (source === '微博热搜') {
-      const data = [
-        { title: "名侦探柯南声明", hotness: "2071926", tag: "爆" },
-        { title: "微博之夜 官宣阵容", hotness: "1597149", tag: "热" },
-        { title: "国产电力心脏全球爆单", hotness: "904994", tag: "新" },
-        { title: "周杰伦演唱会 抢票", hotness: "852331", tag: "热" },
+      const baseData = [
+        { title: "名侦探柯南声明", hotness: (2071926 + randomShift()).toString(), tag: "爆" },
+        { title: "微博之夜 官宣阵容", hotness: (1597149 + randomShift()).toString(), tag: "热" },
+        { title: "国产电力心脏全球爆单", hotness: (904994 + randomShift()).toString(), tag: "新" },
+        { title: "周杰伦演唱会 抢票", hotness: (852331 + randomShift()).toString(), tag: "热" },
         { title: "美团外卖周末半价吃大餐", hotness: "推荐", tag: "商" },
-        { title: "中国最新富豪榜出炉", hotness: "694746", tag: "新" },
-        { title: "原来这就是极简主义生活", hotness: "542110", tag: "暖" },
-        { title: "冬天的第一根冰糖葫芦", hotness: "410229", tag: "新" },
-        { title: "猫咪也会因为害羞躲起来吗", hotness: "320118", tag: "荐" },
-        { title: "打工人周五的心情", hotness: "298774", tag: "新" }
+        { title: "中国最新富豪榜出炉", hotness: (694746 + randomShift()).toString(), tag: "新" },
+        { title: "原来这就是极简主义生活", hotness: (542110 + randomShift()).toString(), tag: "暖" },
+        { title: "冬天的第一根冰糖葫芦", hotness: (410229 + randomShift()).toString(), tag: "新" },
+        { title: "猫咪也会因为害羞躲起来吗", hotness: (320118 + randomShift()).toString(), tag: "荐" },
+        { title: "打工人周五的心情", hotness: (298774 + randomShift()).toString(), tag: "新" }
       ];
-      return data.map(d => ({
+      return baseData.map(d => ({
         ...d,
         url: `https://s.weibo.com/weibo?q=${encodeSearch(d.title)}`
       }));
     } else {
-      const data = [
-        { title: "全网挑战这个丝滑小连招", hotness: "🔥 1250w", tag: "热" },
-        { title: "这就是生活中的小确幸吧", hotness: "💖 890w", tag: "荐" },
-        { title: "假如动物会说话", hotness: "🎭 760w", tag: "新" },
-        { title: "我的家乡在冬季美如画", hotness: "❄️ 650w", tag: "热" },
-        { title: "这个冬天一定要去一次哈尔滨", hotness: "🚄 580w", tag: "爆" },
-        { title: "打工人的午餐开箱", hotness: "🍱 420w", tag: "新" },
-        { title: "00后整顿职场名场面", hotness: "💼 390w", tag: "热" },
-        { title: "被这首BGM洗脑了", hotness: "🎵 350w", tag: "新" },
-        { title: "那些年我们追过的偶像剧", hotness: "📺 280w", tag: "荐" },
-        { title: "大学生组团去泰山看日出", hotness: "🌅 210w", tag: "新" }
+      const baseData = [
+        { title: "全网挑战这个丝滑小连招", hotness: `🔥 ${1200 + Math.floor(Math.random() * 100)}w`, tag: "热" },
+        { title: "这就是生活中的小确幸吧", hotness: `💖 ${800 + Math.floor(Math.random() * 100)}w`, tag: "荐" },
+        { title: "假如动物会说话", hotness: `🎭 ${700 + Math.floor(Math.random() * 100)}w`, tag: "新" },
+        { title: "我的家乡在冬季美如画", hotness: `❄️ ${600 + Math.floor(Math.random() * 100)}w`, tag: "热" },
+        { title: "这个冬天一定要去一次哈尔滨", hotness: `🚄 ${500 + Math.floor(Math.random() * 100)}w`, tag: "爆" },
+        { title: "打工人的午餐开箱", hotness: `🍱 ${400 + Math.floor(Math.random() * 100)}w`, tag: "新" },
+        { title: "00后整顿职场名场面", hotness: `💼 ${300 + Math.floor(Math.random() * 100)}w`, tag: "热" },
+        { title: "被这首BGM洗脑了", hotness: `🎵 ${200 + Math.floor(Math.random() * 100)}w`, tag: "新" },
+        { title: "那些年我们追过的偶像剧", hotness: `📺 ${100 + Math.floor(Math.random() * 100)}w`, tag: "荐" },
+        { title: "大学生组团去泰山看日出", hotness: `🌅 ${50 + Math.floor(Math.random() * 100)}w`, tag: "新" }
       ];
-      return data.map(d => ({
+      return baseData.map(d => ({
         ...d,
         url: `https://www.douyin.com/search/${encodeSearch(d.title)}`
       }));
@@ -67,25 +72,24 @@ const App: React.FC = () => {
 
   const startAnalysis = async () => {
     setErrorMessage("");
-    setReport("");
-    setRawResults({});
+    // 保持旧数据可见直到新数据到来，提升体验
+    setStatus(activeMode === 'screenshot' ? AppStatus.PROCESSING_IMAGE : AppStatus.FETCHING);
     
     try {
       let finalResults: RawResults = {};
 
       if (activeMode === 'screenshot') {
         if (!uploadedImage) throw new Error("⚠️ 请先在左侧上传热搜榜单截图");
-        setStatus(AppStatus.PROCESSING_IMAGE);
         finalResults = await parseHotSearchFromImage(uploadedImage.data, uploadedImage.type);
       } else {
         if (selectedSources.length === 0) throw new Error("⚠️ 请至少选择一个采摘平台");
-        setStatus(AppStatus.FETCHING);
         for (const source of selectedSources) {
           finalResults[source] = await fetchMockHotData(source);
         }
       }
 
       setRawResults(finalResults);
+      setLastUpdated(new Date());
       setStatus(AppStatus.ANALYZING);
       const aiReport = await generateGossipReport(finalResults);
       setReport(aiReport);
@@ -124,21 +128,31 @@ const App: React.FC = () => {
       />
 
       <main className="flex-1 flex flex-col min-w-0">
-        <Header />
+        <Header lastUpdated={lastUpdated} />
         
         <div className="p-4 md:p-10 max-w-6xl mx-auto w-full">
           {/* Main Action Area */}
           <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-8">
-            <div className="mb-6">
-              <h2 className="text-xl font-black text-gray-800 flex items-center gap-2">
-                {activeMode === 'screenshot' ? '📸 截图解析模式' : '🌐 平台实时采摘'}
-                <span className="text-xs font-medium bg-green-100 text-green-600 px-2 py-0.5 rounded-full">ACTIVE</span>
-              </h2>
-              <p className="text-sm text-gray-500 mt-1">
-                {activeMode === 'screenshot' 
-                  ? '已为您准备好视觉引擎，只需点击下方按钮即可识别图中内容。' 
-                  : '我们将直接请求云端数据源，获取当前讨论度最高的关键词。'}
-              </p>
+            <div className="mb-6 flex justify-between items-start">
+              <div>
+                <h2 className="text-xl font-black text-gray-800 flex items-center gap-2">
+                  {activeMode === 'screenshot' ? '📸 截图解析模式' : '🌐 平台实时采摘'}
+                  <span className="text-xs font-medium bg-green-100 text-green-600 px-2 py-0.5 rounded-full uppercase">Live</span>
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  {activeMode === 'screenshot' 
+                    ? '已为您准备好视觉引擎，只需点击下方按钮即可识别图中内容。' 
+                    : '我们将直接请求云端数据源，获取当前讨论度最高的关键词。'}
+                </p>
+              </div>
+              {lastUpdated && (
+                <button 
+                  onClick={startAnalysis}
+                  className="text-xs font-bold text-green-600 hover:text-green-700 flex items-center gap-1 transition-colors"
+                >
+                  <span className="animate-spin">🔄</span> 立即更新榜单
+                </button>
+              )}
             </div>
 
             <button
@@ -170,9 +184,9 @@ const App: React.FC = () => {
 
           <StatusIndicator status={status} error={errorMessage} />
 
-          {(status !== AppStatus.IDLE || errorMessage) && (
+          {(status !== AppStatus.IDLE || errorMessage || Object.keys(rawResults).length > 0) && (
             <div className="mt-8 transition-all animate-in fade-in slide-in-from-bottom-4">
-              <TabView report={report} rawResults={rawResults} isLoading={status === AppStatus.ANALYZING || status === AppStatus.PROCESSING_IMAGE} />
+              <TabView report={report} rawResults={rawResults} isLoading={status === AppStatus.ANALYZING || status === AppStatus.PROCESSING_IMAGE || status === AppStatus.FETCHING} />
             </div>
           )}
         </div>

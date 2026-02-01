@@ -3,10 +3,10 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  // 生产环境通常使用根路径
+  // 显式设置基础路径为根目录
   base: '/',
   define: {
-    // 确保 API_KEY 能正确注入到客户端代码
+    // 确保环境变量正确传递
     'process.env.API_KEY': JSON.stringify(process.env.API_KEY)
   },
   server: {
