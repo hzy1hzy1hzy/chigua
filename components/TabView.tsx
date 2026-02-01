@@ -1,14 +1,14 @@
-
 import React, { useState } from 'react';
 import { RawResults, HotItem } from '../types';
 
 interface TabViewProps {
   report: string;
   rawResults: RawResults;
+  searchSources?: any[];
   isLoading: boolean;
 }
 
-const TabView: React.FC<TabViewProps> = ({ report, rawResults, isLoading }) => {
+const TabView: React.FC<TabViewProps> = ({ report, rawResults, searchSources = [], isLoading }) => {
   const [activeTab, setActiveTab] = useState<'report' | 'raw'>('report');
 
   const renderFormattedText = (text: string) => {
@@ -51,7 +51,7 @@ const TabView: React.FC<TabViewProps> = ({ report, rawResults, isLoading }) => {
             activeTab === 'report' ? 'bg-white shadow-sm text-green-600 scale-[1.02]' : 'text-gray-400 hover:text-gray-600'
           }`}
         >
-          📑 幽默吃瓜日报
+          📑 实时吃瓜日报
         </button>
         <button
           onClick={() => setActiveTab('raw')}
@@ -59,7 +59,7 @@ const TabView: React.FC<TabViewProps> = ({ report, rawResults, isLoading }) => {
             activeTab === 'raw' ? 'bg-white shadow-sm text-green-600 scale-[1.02]' : 'text-gray-400 hover:text-gray-600'
           }`}
         >
-          📊 原始瓜田概览
+          📊 真实瓜田概览
         </button>
       </div>
 
@@ -71,16 +71,37 @@ const TabView: React.FC<TabViewProps> = ({ report, rawResults, isLoading }) => {
                 <div className="h-4 bg-gray-100 rounded w-3/4"></div>
                 <div className="h-4 bg-gray-100 rounded w-full"></div>
                 <div className="h-4 bg-gray-100 rounded w-5/6"></div>
-                <div className="h-12 bg-gray-200 rounded-2xl w-full mt-8"></div>
-                <div className="h-4 bg-gray-100 rounded w-full"></div>
-                <div className="h-4 bg-gray-100 rounded w-2/3"></div>
               </div>
             ) : (
               <div className="text-gray-800 leading-relaxed font-normal text-lg">
-                {report ? renderFormattedText(report) : (
+                {report ? (
+                  <>
+                    {renderFormattedText(report)}
+                    {searchSources.length > 0 && (
+                      <div className="mt-12 pt-6 border-t border-gray-100">
+                        <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">🔍 搜索来源参考</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {searchSources.map((chunk, idx) => (
+                            chunk.web && (
+                              <a 
+                                key={idx} 
+                                href={chunk.web.uri} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-[10px] bg-gray-50 text-gray-500 px-2 py-1 rounded border border-gray-100 hover:bg-green-50 hover:text-green-600 transition-colors"
+                              >
+                                {chunk.web.title || "查看来源"}
+                              </a>
+                            )
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
                   <div className="text-center py-20">
                     <span className="text-6xl mb-4 block animate-bounce">🍉</span>
-                    <p className="text-gray-400 font-bold">主编大人正在赶来的路上，请先开启今日瓜田...</p>
+                    <p className="text-gray-400 font-bold">主编大人正在查阅实时搜索，请稍候...</p>
                   </div>
                 )}
               </div>
@@ -91,11 +112,8 @@ const TabView: React.FC<TabViewProps> = ({ report, rawResults, isLoading }) => {
             <div className="mb-6 flex items-center justify-between">
               <p className="text-xs text-gray-400 font-bold flex items-center gap-2">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
-                实时热榜数据（每分钟自动刷新机制已就绪）
+                基于 Google Search 捕获的真实热榜
               </p>
-              {Object.keys(rawResults).length > 0 && (
-                <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded font-black">已校验时效性</span>
-              )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {(Object.entries(rawResults) as [string, HotItem[]][]).map(([source, items]) => (
@@ -123,9 +141,9 @@ const TabView: React.FC<TabViewProps> = ({ report, rawResults, isLoading }) => {
                             <span className="break-all">{item.title}</span>
                             {item.tag && (
                               <span className={`px-1 rounded text-[10px] font-black text-white shrink-0 ${
-                                item.tag === '新' ? 'bg-red-400' : 
-                                item.tag === '热' ? 'bg-orange-400' : 
-                                item.tag === '爆' ? 'bg-red-600' : 'bg-blue-400'
+                                item.tag.includes('新') ? 'bg-red-400' : 
+                                item.tag.includes('热') ? 'bg-orange-400' : 
+                                item.tag.includes('爆') ? 'bg-red-600' : 'bg-blue-400'
                               }`}>
                                 {item.tag}
                               </span>
@@ -137,9 +155,6 @@ const TabView: React.FC<TabViewProps> = ({ report, rawResults, isLoading }) => {
                             </span>
                           )}
                         </div>
-                        <svg className="w-4 h-4 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity self-center" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
                       </div>
                     ))}
                   </div>
@@ -147,8 +162,8 @@ const TabView: React.FC<TabViewProps> = ({ report, rawResults, isLoading }) => {
               ))}
               {Object.keys(rawResults).length === 0 && (
                 <div className="col-span-2 py-20 flex flex-col items-center justify-center text-gray-300 gap-4">
-                  <span className="text-6xl opacity-30">📭</span>
-                  <p className="font-bold">暂无瓜田数据，请先开始采摘</p>
+                  <span className="text-6xl opacity-30">🔍</span>
+                  <p className="font-bold">点击按钮开始搜索真实瓜田</p>
                 </div>
               )}
             </div>
